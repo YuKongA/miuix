@@ -32,7 +32,6 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -154,7 +153,7 @@ fun Switch(
                 value = checked,
                 onValueChange = {
                     if (onCheckedChange == null) return@toggleable
-                    onCheckedChange?.invoke(!checked)
+                    onCheckedChange.invoke(!checked)
                     hapticFeedback.performHapticFeedback(
                         if (checked) HapticFeedbackType.ToggleOn
                         else HapticFeedbackType.ToggleOff
@@ -174,7 +173,7 @@ fun Switch(
                 .drawBehind {
                     drawCircle(color = thumbColor)
                 }
-                .pointerInput(Unit) {
+                .pointerInput(checked) {
                     if (!enabled) return@pointerInput
                     awaitEachGesture {
                         val pressInteraction: PressInteraction.Press
@@ -190,7 +189,7 @@ fun Switch(
                         }
                     }
                 }
-                .pointerInput(Unit) {
+                .pointerInput(checked) {
                     if (!enabled) return@pointerInput
                     val dragInteraction: DragInteraction.Start = DragInteraction.Start()
                     detectHorizontalDragGestures(
