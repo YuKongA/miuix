@@ -109,8 +109,8 @@ private fun SuperDialogContent(
     content: @Composable () -> Unit
 ) {
     val density = LocalDensity.current
-    val windowSize by rememberUpdatedState(getWindowSize())
-    val roundedCorner by rememberUpdatedState(getRoundedCorner())
+    val windowSize = getWindowSize()
+    val roundedCorner = getRoundedCorner()
 
     val windowWidth by remember(windowSize, density) {
         derivedStateOf { windowSize.width.dp / density.density }

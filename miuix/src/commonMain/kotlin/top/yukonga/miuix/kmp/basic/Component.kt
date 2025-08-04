@@ -76,19 +76,21 @@ fun BasicComponent(
         }
     }
 
+    val clickableModifier = remember(onClick, enabled, interactionSource) {
+        if (onClick != null && enabled) {
+            Modifier.clickable(
+                indication = LocalIndication.current,
+                interactionSource = interactionSource,
+                onClick = onClick
+            )
+        } else Modifier
+    }
+
     SubcomposeLayout(
         modifier = modifier
             .heightIn(min = 56.dp)
             .fillMaxWidth()
-            .then(
-                if (onClick != null && enabled) {
-                    Modifier.clickable(
-                        indication = LocalIndication.current,
-                        interactionSource = interactionSource,
-                        onClick = { onClick.invoke() }
-                    )
-                } else Modifier
-            )
+            .then(clickableModifier)
             .padding(insideMargin)
     ) { constraints ->
         val looseConstraints = constraints.copy(minWidth = 0, minHeight = 0)
