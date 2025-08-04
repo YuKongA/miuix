@@ -65,9 +65,6 @@ fun Checkbox(
     colors: CheckboxColors = CheckboxDefaults.checkboxColors(),
     enabled: Boolean = true,
 ) {
-    val isChecked by rememberUpdatedState(checked)
-    val currentOnCheckedChange by rememberUpdatedState(onCheckedChange)
-
     val hapticFeedback = LocalHapticFeedback.current
 
     val interactionSource = remember { MutableInteractionSource() }
@@ -75,10 +72,12 @@ fun Checkbox(
     val isDragged by interactionSource.collectIsDraggedAsState()
     val isHovered by interactionSource.collectIsHoveredAsState()
 
-    val springSpec = spring<Float>(
-        dampingRatio = Spring.DampingRatioLowBouncy,
-        stiffness = Spring.StiffnessMedium
-    )
+    val springSpec = remember {
+        spring<Float>(
+            dampingRatio = Spring.DampingRatioLowBouncy,
+            stiffness = Spring.StiffnessMedium
+        )
+    }
 
     val size by animateFloatAsState(
         targetValue = if (!enabled) 1f else if (isPressed || isDragged || isHovered) 0.95f else 1f,
@@ -86,25 +85,25 @@ fun Checkbox(
     )
 
     val backgroundColor by animateColorAsState(
-        targetValue = if (isChecked) colors.checkedBackgroundColor(enabled) else colors.uncheckedBackgroundColor(enabled),
+        targetValue = if (checked) colors.checkedBackgroundColor(enabled) else colors.uncheckedBackgroundColor(enabled),
         animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing)
     )
 
     val foregroundColor by animateColorAsState(
-        targetValue = if (isChecked) colors.checkedForegroundColor(enabled) else colors.uncheckedForegroundColor(enabled),
+        targetValue = if (checked) colors.checkedForegroundColor(enabled) else colors.uncheckedForegroundColor(enabled),
         animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing)
     )
 
-    val checkmarkAnim = rememberCheckmarkAnimationState(isChecked)
+    val checkmarkAnim = rememberCheckmarkAnimationState(checked)
 
     val finalModifier = if (onCheckedChange != null) {
         Modifier.toggleable(
-            value = isChecked,
+            value = checked,
             onValueChange = {
-                if (currentOnCheckedChange == null) return@toggleable
-                currentOnCheckedChange?.invoke(!isChecked)
+                if (onCheckedChange == null) return@toggleable
+                onCheckedChange?.invoke(!checked)
                 hapticFeedback.performHapticFeedback(
-                    if (isChecked) HapticFeedbackType.ToggleOn else HapticFeedbackType.ToggleOff
+                    if (checked) HapticFeedbackType.ToggleOn else HapticFeedbackType.ToggleOff
                 )
             },
             enabled = enabled,
