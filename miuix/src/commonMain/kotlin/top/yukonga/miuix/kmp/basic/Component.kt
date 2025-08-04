@@ -61,6 +61,7 @@ fun BasicComponent(
 ) {
     @Suppress("NAME_SHADOWING")
     val interactionSource = interactionSource ?: remember { MutableInteractionSource() }
+    val indication = LocalIndication.current
 
     val holdDown = remember { mutableStateOf<HoldDownInteraction.HoldDown?>(null) }
     LaunchedEffect(holdDownState) {
@@ -79,7 +80,7 @@ fun BasicComponent(
     val clickableModifier = remember(onClick, enabled, interactionSource) {
         if (onClick != null && enabled) {
             Modifier.clickable(
-                indication = LocalIndication.current,
+                indication = indication,
                 interactionSource = interactionSource,
                 onClick = onClick
             )
