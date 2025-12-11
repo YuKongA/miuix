@@ -14,13 +14,34 @@ val javadocJar by tasks.registering(Jar::class) {
 }
 
 val githubUrl = "https://github.com"
-val projectUrl = "$githubUrl/compose-miuix-ui/miuix"
+val githubPkgUrl = "https://maven.pkg.github.com"
+val owner = "compose-miuix-ui"
+val repository = "miuix"
+val projectUrl = "$githubUrl/$owner/$repository"
+val githubPackagesUrl = "$githubPkgUrl/$owner/$repository"
 
 publishing {
     // Configure the publication repository
     repositories {
         maven {
             url = uri(layout.buildDirectory.dir("repo"))
+        }
+        if (project.version.toString().endsWith("SNAPSHOT")) {
+            maven {
+                name = "github"
+                url = uri(githubPackagesUrl)
+                val localPropertiesFile = project.rootProject.file("local.properties")
+                val localProperties = Properties()
+                if (localPropertiesFile.exists()) {
+                    FileInputStream(localPropertiesFile).use { fis ->
+                        localProperties.load(fis)
+                    }
+                }
+                credentials {
+                    username = System.getenv("GITHUB_ACTOR") ?: localProperties.getProperty("GITHUB_ACTOR")
+                    password = System.getenv("GITHUB_TOKEN") ?: localProperties.getProperty("GITHUB_TOKEN")
+                }
+            }
         }
     }
     // Configure all publications
@@ -72,12 +93,10 @@ signing {
     val localPropertiesFile = project.rootProject.file("local.properties")
     val localProperties = Properties()
     if (localPropertiesFile.exists()) {
-        FileInputStream(localPropertiesFile).use { fis ->
-            localProperties.load(fis)
-        }
+        FileInputStream(localPropertiesFile).use { localProperties.load(it) }
     }
-    val signingKey = localProperties.getProperty("GPG_SIGNING_KEY") ?: System.getenv("GPG_SIGNING_KEY")
-    val signingPassword = localProperties.getProperty("GPG_SIGNING_KEY") ?: System.getenv("GPG_PASSPHRASE")
+    val signingKey = System.getenv("GPG_SIGNING_KEY") ?: localProperties.getProperty("GPG_SIGNING_KEY")
+    val signingPassword = System.getenv("GPG_PASSPHRASE") ?: localProperties.getProperty("GPG_PASSPHRASE")
     useInMemoryPgpKeys(signingKey, signingPassword)
     sign(publishing.publications)
 }
