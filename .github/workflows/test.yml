@@ -41,6 +41,16 @@ jobs:
           java-version: "21"
       - name: Build with Gradle
         uses: gradle/actions/setup-gradle@v6
+      - name: Trigger Android SDK download
+        if: runner.os == 'Linux' || runner.os == 'macOS'
+        run: ./gradlew help --no-configuration-cache > /dev/null 2>&1 || true
+      - name: Fix Android SDK 37 platform naming
+        if: runner.os == 'Linux' || runner.os == 'macOS'
+        run: |
+          PLATFORMS_DIR="$ANDROID_HOME/platforms"
+          if [ -d "$PLATFORMS_DIR/android-37.0" ] && [ ! -d "$PLATFORMS_DIR/android-37" ]; then
+            ln -s "$PLATFORMS_DIR/android-37.0" "$PLATFORMS_DIR/android-37"
+          fi
       - name: Run check
         if: matrix.os == 'macos-latest'
         run: ./gradlew check
